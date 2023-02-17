@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 # SHort program that concatenates text files in directories and subdirectories into one file.
 # Usage: python dass.py [directory] [output file]
 # The output file will be created if it does not exist. If it does exist, it will be overwritten.
