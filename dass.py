@@ -17,7 +17,7 @@ def main():
     print(output_file)
     if os.path.exists(output_file):
         print("Output file exists. It will be overwritten.")
-    output = open(output_file, 'w', 'utf-8-sig')
+    output = open(output_file, 'w', 'utf-8')
 
     directories = []
     files = []
