@@ -18,7 +18,7 @@ def main():
     print(output_file)
     if os.path.exists(output_file):
         print("Output file exists. It will be overwritten.")
-    #with open(output_file, 'w', 'utf-8') as output
+    output = open(output_file, 'w', encoding='utf-8')
 
     directories = []
     files = []
@@ -46,16 +46,14 @@ def main():
         chapter ="\n\n" + re.sub("^\d+", "", os.path.dirname(os.path.normpath(file))) + "\n\n"
         if chapter != last_chapter:
             #writeonce = True
-            with open(output_file, 'w', encoding='utf-8') as output:
-                output.write(chapter)
+            output.write(chapter)
             last_chapter = chapter
         if file.endswith(".txt"):
             input_file = open(os.path.join(file), 'r')
             print(input_file.name)
             # Write the name of the file without extension to the output file.
-            with open(output_file, 'w', encoding='utf-8') as output:
-                output.write("\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
-                output.write(input_file.read())
+            output.write("\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
+            output.write(input_file.read())
             # print the filename of the file that is being concatenated to the output file.
             input_file.close()
     output.close()
