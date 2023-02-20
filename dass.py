@@ -7,6 +7,7 @@ import os
 import sys
 import re
 import io
+import shlex
 
 def main():
     if len(sys.argv) != 3:
@@ -53,7 +54,20 @@ def main():
             print(input_file.name)
             # Write the name of the file without extension to the output file.
             output.write("\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
-            output.write(input_file.read())
+            
+            for line in input_file.readlines():
+                lex = shlex.shlex(line)
+                lex.whitespace = '' # if you want to strip newlines, use '\n'
+                line = ''.join(list(lex))
+                if not line:
+                    continue
+                # process decommented line
+                """ fields = shlex.split(line, comments=True)
+                if not fields:
+                    continue """
+                output.write(line)
+
+                #output.write(input_file.read())
             # print the filename of the file that is being concatenated to the output file.
             input_file.close()
     output.close()
