@@ -13,9 +13,9 @@ import markdown
 
 argparse = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.')
 argparse.add_argument('directory', help='The directory to concatenate.')
-argparse.add_argument('output_file', help='The output file to create.')
-argparse.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers.')
-argparse.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Useful for markdown output.')
+argparse.add_argument('output_name', help='Output file with .text-extension to create. If it exists, it will be overwritten.')
+argparse.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
+argparse.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
 argparse.add_argument('-t', '--title', help='Custom title for the output file.')
 argparse.add_argument('-b', '--disable_bom', action='store_true', help='Disable the Byte Order Mark (BOM) in the output file.')
 args = argparse.parse_args()
@@ -26,14 +26,24 @@ def main():
     #    print("Usage: python dass.py [directory] [output file]")
     #    return
     #directory = sys.argv[1]
+    if args.html:
+        args.markdown = True
     directory = os.path.normpath(args.directory)
     print(directory)
     #output_file = sys.argv[2]
-    output_file = os.path.normpath(args.output_file)
-    print(output_file)
-    if os.path.exists(output_file):
-        print("Output file exists. It will be overwritten.")
-    output = open(output_file, 'w', encoding='utf-8-sig')
+    outname = os.path.normpath(args.output_name)
+    output_text = os.path.normpath(outname + ".text")
+    output_markdown = os.path.normpath(outname + ".md")
+    output_html = os.path.normpath(outname + ".html")
+    print(outname)
+    if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
+        print("At least one file exists. It will be overwritten.")
+    out_text = open(output_text, 'w', encoding='utf-8-sig')
+    if args.markdown:
+        out_md = open(output_markdown, 'w', encoding='utf-8-sig')
+    if args.html:
+        out_html = open(output_html, 'w', encoding='utf-8-sig')
+
 
     directories = []
     files = []
@@ -51,11 +61,15 @@ def main():
     #    files.extend(os.path.join(dirs, f) for f in filenames)
     #    files = sorted(files)
     #    dirs = sorted(dirs)
+    out_buf_md = ''
+    out_buf_text = ''
     if args.title:
         if args.markdown:
-            output.write("# " + args.title + "\n\n")
-        else:
-            output.write(args.title + "\n\n")
+            #output.write("# " + args.title + "\n\n")
+            out_buf_md += "# " + args.title + "\n\n"
+        
+        #output.write(args.title + "\n\n")
+        out_buf_text += args.title + "\n\n"
     print(directories)
     print(files)
     last_chapter = ''
@@ -65,32 +79,45 @@ def main():
         #print(dirpath + '...' + file)
         if file.endswith(".txt"):
             input_file = open(os.path.join(file), 'r')
-            out_buff = ''
+            print(input_file.name)
+            temp_buf = ''
             for line in input_file.readlines():
                 lex = shlex.shlex(line)
                 lex.whitespace = ''
                 line = ''.join(list(lex))
                 if not line:
+                    print("Found comment line: " + line + " Skipping.")
                     continue
-                out_buff += line
+                #temp_out_buf_md += line
+                #temp_out_buf_text += line
+                temp_buf += line
 
-        chapter = re.sub("^\d+", "", os.path.dirname(os.path.normpath(file)))
-        if chapter != last_chapter:
-            #writeonce = True
-            if args.markdown:
-                output.write("\n\n" + "## " + chapter + "\n\n")
-            else:
-                output.write("\n\n" + chapter + "\n\n")
-            last_chapter = chapter
-        if file.endswith(".txt"):
+            chapter = re.sub("^\d+", "", os.path.dirname(os.path.normpath(input_file.name)))
+            print("Current filename: " + input_file.name)
+            print("Chapter: " + chapter + " Last chapter: " + last_chapter)
+            if chapter != last_chapter:
+                print("+Chapter: " + chapter)
+                if args.markdown:
+                    #output.write("\n\n" + "## " + chapter + "\n\n")
+                    out_buf_md += "\n\n" + "## " + chapter + "\n\n"
+                
+                #output.write("\n\n" + chapter + "\n\n")
+                out_buf_text += "\n\n" + chapter + "\n\n"
+                last_chapter = chapter
+
+        #if file.endswith(".txt"):
             input_file = open(os.path.join(file), 'r')
-            print(input_file.name)
+            print("Input file for rubrik: " + input_file.name)
             # Write the name of the file without extension to the output file.
             if args.markdown:
-                output.write("\n\n" + "### " + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
-            else:
-                output.write("\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
-            output.write(out_buff)
+                #output.write("\n\n" + "### " + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
+                out_buf_md += "\n\n" + "### " + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
+                out_buf_md += temp_buf
+            
+            #output.write("\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n")
+            out_buf_text += "\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
+            out_buf_text += temp_buf
+            #output.write(out_buff)
             """ for line in input_file.readlines():
                 lex = shlex.shlex(line)
                 lex.whitespace = '' # if you want to strip newlines, use '\n'
@@ -107,15 +134,21 @@ def main():
                 #output.write(input_file.read()) """
             # print the filename of the file that is being concatenated to the output file.
             input_file.close()
+    out_text.write(out_buf_text)
+    out_text.close()
+    if args.markdown:
+        out_md.write(out_buf_md)
+        out_md.close()
     if args.html:
-        # Read the output file into a string.
+        out_html.write(markdown.markdown(out_buf_md, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite']))
+        """ # Read the output file into a string.
         output.close()
         output = open(output_file, 'r', encoding='utf-8-sig')
         output_string = output.read()
         output.close()
-        output = open(output_file, 'w', encoding='utf-8-sig')
-        output.write(markdown.markdown(output_string, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite']))
-    output.close()
+        output_html = open(output_file, 'w', encoding='utf-8-sig')
+        output.write(markdown.markdown(output_string, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite'])) """
+        out_html.close()
 
 if __name__ == "__main__":
     main() 
