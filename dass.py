@@ -4,9 +4,7 @@
 # The output file will be created if it does not exist. If it does exist, it will be overwritten.
 
 import os
-#import sys
 import re
-#import io
 import shlex
 import argparse
 import markdown
