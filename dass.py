@@ -8,7 +8,7 @@ import re
 import shlex
 import argparse
 import markdown
-import argcomplete
+#import argcomplete
 
 def create(args):
     if args.chapter:
@@ -203,7 +203,7 @@ ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The b
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
 args = argparse.parse_args()
-argcomplete.autocomplete(argparse)
+#argcomplete.autocomplete(argparse)
 
 def main(args):
     args.func(args)
