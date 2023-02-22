@@ -13,7 +13,7 @@ import argcomplete
 def create(args):
     if args.chapter:
         print("Adding new chapter with number " + str(f"{args.number:03d} and title {args.title}"))
-        new_dir = os.path.join(str(f"{args.number:03d}{args.title}"))# + args.title)
+        new_dir = os.path.join(str(f"{args.number:03d}{args.title}"))
         if not os.path.exists(os.path.normpath(new_dir)): 
             os.mkdir(new_dir)
         else:
@@ -23,7 +23,6 @@ def create(args):
     else:
         print("Adding new document with number " + str(f"{args.number:03d} and title {args.title}"))
         new_file = open(os.path.join(str(f"{args.number:03d}{args.title}.txt")), 'w')
-        # + args.title + ".txt"), 'w')
         print(new_file)
         if not os.path.exists(os.path.normpath(new_file.name)):
             new_file.write('')
@@ -41,7 +40,6 @@ def rename(args):
             if file.startswith(str(f"{args.in_number:03d}")):
                 print("Found file " + file)
                 if args.title:
-                    #os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(args.out_number) + args.title + ".txt"))
                     if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}.txt")))):
                         os.rename(os.path.join(args.directory, file), os.path.join(args.directory), str(f"{args.out_number:03d}{args.title}.txt"))
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{args.title}.txt"))
@@ -57,7 +55,6 @@ def rename(args):
                     else:
                         print("File already exists.")
                         exit(1)
-                    #os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(args.out_number) + ".txt"))
                 exit()
         for dir in dirnames:
             if dir.startswith(str(f"{args.in_number:03d}")):
@@ -69,7 +66,6 @@ def rename(args):
                     else:
                         print("Directory already exists.")
                         exit(1)
-                    #os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(args.out_number) + args.title))
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', dir).group(2)
@@ -79,14 +75,8 @@ def rename(args):
                     else:
                         print("Directory already exists.")
                         exit(1)
-                    #os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(args.out_number) + title))
                 exit()
     
-    #print("Renaming document with number " + str(args.in_number) + " to number " + str(args.out_number) + " and title " + args.title)
-    #if args.title:
-    #    os.rename(os.path.join(args.directory, str(args.in_number) + ".txt"), os.path.join(args.directory, str(args.out_number) + args.title + ".txt"))
-    #else:
-    #    os.rename(os.path.join(args.directory, str(args.in_number) + ".txt"), os.path.join(args.directory, str(args.out_number) + ".txt"))
 def compile(args):
     if args.html:
         args.markdown = True
@@ -206,10 +196,8 @@ args = argparse.parse_args()
 if not args.directory:
     args.directory = "."
 argcomplete.autocomplete(argparse)
-args.func(args)
 
-
-
-
-#if __name__ == "__main__":
-#    main() 
+def main(args):
+    args.func(args)
+if __name__ == "__main__":
+    main(args) 
