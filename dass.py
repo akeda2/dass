@@ -160,11 +160,18 @@ def compile(args):
     if args.html:
         out_html.write(markdown.markdown(out_buf_md, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite']))
         out_html.close()
-
-
+""" def print_help(args, argparse):
+    if args.subcommand is None:
+        # Show the help message for the main parser
+        argparse.print_help()
+    else:
+        # Show the help message for a specific subcommand
+        subparser = argparse._subparsers._actions[0].choices[args.subcommand]
+        subparser.print_help()
+ """
 
 argparse = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.')
-subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help')
+subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help', dest='subcommand')
 
 # A parser for the "compile" command
 compile_parser = subparsers.add_parser('compile', help='Sort and Compile a directory of numbered text files into output file.')
@@ -188,7 +195,10 @@ ren_parser = subparsers.add_parser('ren', help='Rename a document')
 ren_parser.add_argument('in_number', type=int, help='The current sorting number of document to rename.')
 ren_parser.add_argument('out_number', type=int, help='The new sorting number of the document to rename.')
 ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
-ren_parser.add_argument('directory', nargs='?', default=".", help='The base directory.')
+ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
+
+#help_parser = subparsers.add_parser("help", help="Show help information")
+#help_parser.set_defaults(func=print_help)
 
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
