@@ -9,17 +9,107 @@ import shlex
 import argparse
 import markdown
 
+def create(args):
+    if args.chapter:
+        print("Adding new chapter with number " + str(f"{args.number:03d} and title {args.title}"))
+        new_dir = os.path.join(str(f"{args.number:03d}{args.title}"))# + args.title)
+        if not os.path.exists(os.path.normpath(new_dir)): 
+            os.mkdir(new_dir)
+        else:
+            print("Directory already exists.")
+        exit()
+    else:
+        print("Adding new document with number " + str(f"{args.number:03d} and title {args.title}"))
+        new_file = open(os.path.join(str(f"{args.number:03d}{args.title}.txt")), 'w')
+        # + args.title + ".txt"), 'w')
+        print(new_file)
+        if not os.path.exists(os.path.normpath(new_file.name)):
+            new_file.write('')
+        else:
+            print("File already exists.")
+        new_file.close()
+        exit()
+
+def rename(args):
+    # Look for document or directory beginning with number:
+    print("Looking for document with number " + str(f"{args.in_number:03d}"))
+    for dirpath, dirnames, filenames in os.walk(args.directory, topdown=True):
+        for file in filenames:
+            if file.startswith(str(f"{args.in_number:03d}")):
+                print("Found file " + file)
+                if args.title:
+                    #os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(args.out_number) + args.title + ".txt"))
+                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}.txt")))):
+                        os.rename(os.path.join(args.directory, file), os.path.join(args.directory), str(f"{args.out_number:03d}{args.title}.txt"))
+                        print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{args.title}.txt"))
+                    else:
+                        print("File already exists.")
+                else:
+                    # If no title is given, use the old title:
+                    title = re.search(r'(\d+)(.*)', file).group(2)
+                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))):
+                        os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
+                        print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{title}"))
+                    else:
+                        print("File already exists.")
+                    #os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(args.out_number) + ".txt"))
+                exit()
+        for dir in dirnames:
+            if dir.startswith(str(f"{args.in_number:03d}")):
+                print("Found directory " + dir)
+                if args.title:
+                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))):
+                        os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))
+                    #os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(args.out_number) + args.title))
+                else:
+                    # If no title is given, use the old title:
+                    title = re.search(r'(\d+)(.*)', dir).group(2)
+                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))):
+                        os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
+                    #os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(args.out_number) + title))
+                exit()
+    
+    #print("Renaming document with number " + str(args.in_number) + " to number " + str(args.out_number) + " and title " + args.title)
+    #if args.title:
+    #    os.rename(os.path.join(args.directory, str(args.in_number) + ".txt"), os.path.join(args.directory, str(args.out_number) + args.title + ".txt"))
+    #else:
+    #    os.rename(os.path.join(args.directory, str(args.in_number) + ".txt"), os.path.join(args.directory, str(args.out_number) + ".txt"))
+
+
 argparse = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.')
-argparse.add_argument('directory', help='The directory to concatenate.')
-argparse.add_argument('output_name', help='Output file with .text-extension to create. If it exists, it will be overwritten.')
-argparse.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
-argparse.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
-argparse.add_argument('-t', '--title', help='Custom title for the output file.')
-#argparse.add_argument('-b', '--disable_bom', action='store_true', help='Disable the Byte Order Mark (BOM) in the output file.')
+subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help')
+
+# A parser for the "compile" command
+compile_parser = subparsers.add_parser('compile', help='Sort and Compile a directory of numbered text files into output file.')
+compile_parser.add_argument('directory', default=".", help='The directory to concatenate.')
+compile_parser.add_argument('output_name', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
+compile_parser.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
+compile_parser.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
+compile_parser.add_argument('-b', '--disable_bom', action='store_true', help='Disable the Byte Order Mark (BOM) in the output file(s).')
+compile_parser.add_argument('-n', '--no_overwrite', action='store_true', help='Do not overwrite existing files.')
+compile_parser.add_argument('-t', '--title', help='Custom title for the output file.')
+compile_parser.set_defaults(func=compile)
+
+# A parser for the "add" command
+add_parser = subparsers.add_parser('add', help='Add a new document')
+add_parser.add_argument('number', type=int, help='The sorting number of the new document.')
+add_parser.add_argument('title', help='The title of the new document.')
+add_parser.add_argument('-c', '--chapter', action="store_true", help='Add new chapter/directory iso document.')
+
+# Rename command
+ren_parser = subparsers.add_parser('ren', help='Rename a document')
+ren_parser.add_argument('in_number', type=int, help='The current sorting number of document to rename.')
+ren_parser.add_argument('out_number', type=int, help='The new sorting number of the document to rename.')
+ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
+ren_parser.add_argument('directory', nargs='?', default=".", help='The base directory.')
+
+add_parser.set_defaults(func=create)
+ren_parser.set_defaults(func=rename)
 args = argparse.parse_args()
+args.func(args)
 
 
-def main():
+def compile():
     if args.html:
         args.markdown = True
     directory = os.path.normpath(args.directory)
@@ -30,7 +120,11 @@ def main():
     output_html = os.path.normpath(outname + ".html")
     print(outname)
     if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
-        print("At least one file exists. It will be overwritten.")
+        if args.no_overwrite:
+            print("File exists! --no_overwrite is set. Exiting.")
+            exit()
+        else:
+            print("At least one file exists. It will be overwritten.")
     out_text = open(output_text, 'w', encoding='utf-8-sig')
     if args.markdown:
         out_md = open(output_markdown, 'w', encoding='utf-8-sig')
@@ -99,5 +193,5 @@ def main():
         out_html.write(markdown.markdown(out_buf_md, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite']))
         out_html.close()
 
-if __name__ == "__main__":
-    main() 
+#if __name__ == "__main__":
+#    main() 
