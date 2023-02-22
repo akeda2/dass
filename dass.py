@@ -8,6 +8,7 @@ import re
 import shlex
 import argparse
 import markdown
+import argcomplete
 
 def create(args):
     if args.chapter:
@@ -118,6 +119,7 @@ ren_parser.add_argument('directory', nargs='?', default=".", help='The base dire
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
 args = argparse.parse_args()
+argcomplete.autocomplete(argparse)
 args.func(args)
 
 
