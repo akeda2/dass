@@ -125,12 +125,12 @@ def compile(args):
             print(input_file.name)
             temp_buf = ''
             for line in input_file.readlines():
-                lex = shlex.shlex(line)
+                """ lex = shlex.shlex(line)
                 lex.whitespace = ''
                 line = ''.join(list(lex))
                 if not line:
                     print("Found comment line: " + line + " Skipping.")
-                    continue
+                    continue """
                 temp_buf += line
 
             chapter = re.sub("^\d+", "", os.path.dirname(os.path.normpath(input_file.name)))
