@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # SHort program that concatenates text files in directories and subdirectories into one file.
-# Usage: python dass.py [directory] [output file]
+# Usage: python dass.py [command] [output]
 # The output file will be created if it does not exist. If it does exist, it will be overwritten.
 
 import os
@@ -9,6 +9,7 @@ import shlex
 import argparse
 import markdown
 #import argcomplete
+import sys
 
 def create(args):
     if args.chapter:
@@ -160,21 +161,12 @@ def compile(args):
     if args.html:
         out_html.write(markdown.markdown(out_buf_md, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite']))
         out_html.close()
-""" def print_help(args, argparse):
-    if args.subcommand is None:
-        # Show the help message for the main parser
-        argparse.print_help()
-    else:
-        # Show the help message for a specific subcommand
-        subparser = argparse._subparsers._actions[0].choices[args.subcommand]
-        subparser.print_help()
- """
 
-argparse = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.')
+argparse = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.', allow_abbrev=True)
 subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help', dest='subcommand')
 
 # A parser for the "compile" command
-compile_parser = subparsers.add_parser('compile', help='Sort and Compile a directory of numbered text files into output file.')
+compile_parser = subparsers.add_parser('compile', aliases=['c','co','com','comp'], help='Sort and Compile a directory of numbered text files into output file.')
 compile_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory to concatenate.')
 compile_parser.add_argument('output_name', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
 compile_parser.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
@@ -185,17 +177,19 @@ compile_parser.add_argument('-t', '--title', help='Custom title for the output f
 compile_parser.set_defaults(func=compile)
 
 # A parser for the "add" command
-add_parser = subparsers.add_parser('add', help='Add a new document')
+add_parser = subparsers.add_parser('add', aliases=['a','ad'], help='Add a new document')
 add_parser.add_argument('number', type=int, help='The sorting number of the new document.')
 add_parser.add_argument('title', help='The title of the new document.')
 add_parser.add_argument('-c', '--chapter', action="store_true", help='Add new chapter/directory iso document.')
 
 # Rename command
-ren_parser = subparsers.add_parser('ren', help='Rename a document')
+ren_parser = subparsers.add_parser('rename', aliases=['r','re','ren'], help='Rename a document')
 ren_parser.add_argument('in_number', type=int, help='The current sorting number of document to rename.')
 ren_parser.add_argument('out_number', type=int, help='The new sorting number of the document to rename.')
 ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
 ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
+
+#subparsers.aliases = {"c": compile_parser, "a": add_parser, "r": 'ren'}
 
 #help_parser = subparsers.add_parser("help", help="Show help information")
 #help_parser.set_defaults(func=print_help)
