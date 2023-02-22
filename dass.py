@@ -17,6 +17,7 @@ def create(args):
             os.mkdir(new_dir)
         else:
             print("Directory already exists.")
+            exit(1)
         exit()
     else:
         print("Adding new document with number " + str(f"{args.number:03d} and title {args.title}"))
@@ -27,6 +28,7 @@ def create(args):
             new_file.write('')
         else:
             print("File already exists.")
+            exit(1)
         new_file.close()
         exit()
 
@@ -44,6 +46,7 @@ def rename(args):
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{args.title}.txt"))
                     else:
                         print("File already exists.")
+                        exit(1)
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', file).group(2)
@@ -52,6 +55,7 @@ def rename(args):
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{title}"))
                     else:
                         print("File already exists.")
+                        exit(1)
                     #os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(args.out_number) + ".txt"))
                 exit()
         for dir in dirnames:
@@ -60,12 +64,20 @@ def rename(args):
                 if args.title:
                     if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))):
                         os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))
+                        print("Renamed directory " + dir + " to " + str(f"{args.out_number:03d}{args.title}"))
+                    else:
+                        print("Directory already exists.")
+                        exit(1)
                     #os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(args.out_number) + args.title))
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', dir).group(2)
                     if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))):
                         os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
+                        print("Renamed directory " + dir + " to " + str(f"{args.out_number:03d}{title}"))
+                    else:
+                        print("Directory already exists.")
+                        exit(1)
                     #os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(args.out_number) + title))
                 exit()
     
