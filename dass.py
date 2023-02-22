@@ -193,8 +193,6 @@ ren_parser.add_argument('directory', nargs='?', default=".", help='The base dire
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
 args = argparse.parse_args()
-if not args.directory:
-    args.directory = "."
 argcomplete.autocomplete(argparse)
 
 def main(args):
