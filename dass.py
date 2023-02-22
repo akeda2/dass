@@ -24,13 +24,18 @@ def create(args):
         exit()
     else:
         print("Adding new document with number " + str(f"{args.number:03d} and title {args.title}"))
-        new_file = open(os.path.join(str(f"{args.number:03d}{args.title}.txt")), 'w')
+        if not os.path.exists(os.path.join(str(f"{args.number:03d}{args.title}.txt"))):
+            # Create new file:
+            new_file = open(os.path.join(str(f"{args.number:03d}{args.title}.txt")), 'w')
+        else:
+            print("File already exists!")
+            exit(1)
         print(new_file)
-        if not os.path.exists(os.path.normpath(new_file.name)):
+        """ if not os.path.exists(os.path.normpath(new_file.name)):
             new_file.write('')
         else:
-            print("File already exists.")
-            exit(1)
+            print("File already exists. 2")
+            exit(1) """
         new_file.close()
         exit()
 
