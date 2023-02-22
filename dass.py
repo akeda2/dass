@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-# SHort program that concatenates text files in directories and subdirectories into one file.
-# Usage: python dass.py [command] [output]
+# Short program that concatenates text files in directories and subdirectories into one file.
+# Usage: python3 dass.py [command] [options] [output]
+# Try python3 dass.py --help for more information.
+# ./inst.sh will install the program to /usr/local/bin/dass
 # The output file will be created if it does not exist. If it does exist, it will be overwritten.
 
 import os
@@ -9,7 +11,6 @@ import shlex
 import argparse
 import markdown
 #import argcomplete
-import sys
 
 def create(args):
     if args.chapter:
@@ -188,11 +189,6 @@ ren_parser.add_argument('in_number', type=int, help='The current sorting number 
 ren_parser.add_argument('out_number', type=int, help='The new sorting number of the document to rename.')
 ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
 ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
-
-#subparsers.aliases = {"c": compile_parser, "a": add_parser, "r": 'ren'}
-
-#help_parser = subparsers.add_parser("help", help="Show help information")
-#help_parser.set_defaults(func=print_help)
 
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
