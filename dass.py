@@ -178,7 +178,7 @@ subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help'
 
 # A parser for the "compile" command
 compile_parser = subparsers.add_parser('compile', help='Sort and Compile a directory of numbered text files into output file.')
-compile_parser.add_argument('directory', default=".", help='The directory to concatenate.')
+compile_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory to concatenate.')
 compile_parser.add_argument('output_name', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
 compile_parser.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
 compile_parser.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
@@ -203,6 +203,8 @@ ren_parser.add_argument('directory', nargs='?', default=".", help='The base dire
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
 args = argparse.parse_args()
+if not args.directory:
+    args.directory = "."
 argcomplete.autocomplete(argparse)
 args.func(args)
 
