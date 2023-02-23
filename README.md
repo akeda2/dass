@@ -7,9 +7,11 @@ Example:
 dass . out
 ```
 Subdirectories will be chapter-markers. All leading digits will be stripped.
-Use a numbering pattern to sort textblocks:
+Using a 3-digit numbering pattern to sort textblocks:
 ```
 010Chapter\ 1
+010Chapter\ 1\020Testfile\ 1.txt
+010Chapter\ 1\030Testfile\ 2.txt
 020Chapter\ 2
 etc.
 ```
