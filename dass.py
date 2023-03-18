@@ -109,16 +109,16 @@ def compile(args):
         else:
             print("File not found: " + args.load)
             exit()
-            
-        with open(settingsfile, 'r') as stream:
-            try:
-                config = yaml.safe_load(stream)
-                compile_parser.set_defaults(**config)
-                print("Loaded configuration from file: " + settingsfile)
-            except yaml.YAMLError as exc:
-                print(exc)
-                exit()
-                #break
+        if os.path.isfile(settingsfile):    
+            with open(settingsfile, 'r') as stream:
+                try:
+                    config = yaml.safe_load(stream)
+                    compile_parser.set_defaults(**config)
+                    print("Loaded configuration from file: " + settingsfile)
+                except yaml.YAMLError as exc:
+                    print(exc)
+                    exit()
+                    #break
     if args.save:
         # Save the given settings to a file:
         settings = {
