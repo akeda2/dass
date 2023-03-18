@@ -10,6 +10,7 @@ import re
 import shlex
 import argparse
 import markdown
+import yaml
 #import argcomplete
 
 def create(args):
@@ -48,7 +49,7 @@ def rename(args):
                 print("Found file " + file)
                 if args.title:
                     if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}.txt")))):
-                        os.rename(os.path.join(args.directory, file), os.path.join(args.directory), str(f"{args.out_number:03d}{args.title}.txt"))
+                        os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}.txt")))
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{args.title}.txt"))
                     else:
                         print("File already exists.")
@@ -85,14 +86,53 @@ def rename(args):
                 exit()
     
 def compile(args):
+    # Load config from yaml file if given, otherwise load the first yaml file found in the current directory.
+    if args.load:
+        # Check if args.load is the default value or if a file was given.
+        if args.load == 'def':
+            for file in os.listdir(os.getcwd()):
+                if file.endswith(".yaml"):
+                    # Load configuration from the first yaSml file found in the current directory.
+                    settingsfile = file
+        # Load configuration from the given yaml file.
+        # Check if the file exists.
+        elif os.path.isfile(args.load):
+            print("Settings file to load: " + args.load)
+            settingsfile = args.load
+        else:
+            print("File not found: " + args.load)
+            exit()
+            
+        with open(settingsfile, 'r') as stream:
+            try:
+                config = yaml.safe_load(stream)
+                compile_parser.set_defaults(**config)
+                print("Loaded configuration from file: " + settingsfile)
+            except yaml.YAMLError as exc:
+                print(exc)
+                exit()
+                #break
+    if args.save:
+        # Save the given settings to a file:
+        settings = {
+            "directory": args.directory if args.directory else os.getcwd(),
+            "output_name": args.output_name if args.output_name else input("Output name: "),
+            "markdown": args.markdown if args.markdown else False,
+            "html": args.html if args.html else False,
+            "title": args.title if args.title else input("Title: "),
+        }
+        new_settings = settings['output_name'] + '.yaml'
+        with open(new_settings, 'w') as file:
+            documents = yaml.dump(settings, file)
+    # Compile the document:
     if args.html:
         args.markdown = True
     directory = os.path.normpath(args.directory)
     print(directory)
-    outname = os.path.normpath(args.output_name)
-    output_text = os.path.normpath(outname + ".text")
-    output_markdown = os.path.normpath(outname + ".md")
-    output_html = os.path.normpath(outname + ".html")
+    outname = os.path.normpath(args.output_name) if args.output_name else config['output_name'] or os.path.normpath(input("Output name: "))
+    output_text = os.path.normpath(outname + ".text") if args.output_name else os.path.normpath(config['output_name'] + ".text") or os.path.normpath(input("Output name: ") + ".text")
+    output_markdown = os.path.normpath(outname + ".md") if args.output_name else os.path.normpath(config['output_name'] + ".md") or os.path.normpath(input("Output name: ") + ".md")
+    output_html = os.path.normpath(outname + ".html") if args.output_name else os.path.normpath(config['output_name'] + ".html") or os.path.normpath(input("Output name: ") + ".html")
     print(outname)
     if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
         if args.no_overwrite:
@@ -174,12 +214,15 @@ subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help'
 # A parser for the "compile" command
 compile_parser = subparsers.add_parser('compile', aliases=['c','co','com','comp'], help='Sort and Compile a directory of numbered text files into output file.')
 compile_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory to concatenate.')
-compile_parser.add_argument('output_name', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
+compile_parser.add_argument('output_name', nargs='?', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
 compile_parser.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
 compile_parser.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
 compile_parser.add_argument('-b', '--disable_bom', action='store_true', help='Disable the Byte Order Mark (BOM) in the output file(s).')
 compile_parser.add_argument('-n', '--no_overwrite', action='store_true', help='Do not overwrite existing files.')
 compile_parser.add_argument('-t', '--title', help='Custom title for the output file.')
+compile_parser.add_argument('-s', '--save', action='store_true', help='Save the given configuration to a file.')
+# Load configuration from the first yaml file found in the current directory. Just load any existing yaml file:
+compile_parser.add_argument('-l', '--load', const='def', nargs='?', help='Load a configuration from a file.')
 compile_parser.set_defaults(func=compile)
 
 # A parser for the "add" command
@@ -195,10 +238,14 @@ ren_parser.add_argument('out_number', type=int, help='The new sorting number of 
 ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
 ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
 
+
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
 args = argparse.parse_args()
 #argcomplete.autocomplete(argparse)
+
+
+
 
 def main(args):
     args.func(args)
