@@ -121,6 +121,9 @@ def compile(args):
                     print(exc)
                     exit()
                     #break
+        else:
+            print("No settings file found.")
+            exit()
     if args.save:
         # Save the given settings to a file:
         settings = {
