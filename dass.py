@@ -111,7 +111,7 @@ def compile(args):
             settingsfile = None
             print("File not found: " + args.load)
             exit()
-        if os.path.isfile(settingsfile):    
+        if settingsfile and os.path.isfile(settingsfile):    
             with open(settingsfile, 'r') as stream:
                 try:
                     config = yaml.safe_load(stream)
