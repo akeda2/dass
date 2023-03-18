@@ -13,6 +13,13 @@ import markdown
 import yaml
 #import argcomplete
 
+def clean(args):
+    # Non recursively clean the current directory of all .html, .text and .md files, except for the README.md file:
+    for file in os.listdir(os.getcwd()):
+        if file.endswith(".html") or file.endswith(".text") or file.endswith(".md") and file != "README.md":
+            print("Removing file " + file)
+            os.remove(file)
+
 def create(args):
     if args.chapter:
         print("Adding new chapter with number " + str(f"{args.number:03d} and title {args.title}"))
@@ -253,9 +260,11 @@ ren_parser.add_argument('out_number', type=int, help='The new sorting number of 
 ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
 ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
 
+clean_parser = subparsers.add_parser('clean', aliases=['cl','cle'], help='Clean up the directory structure.')
 
 add_parser.set_defaults(func=create)
 ren_parser.set_defaults(func=rename)
+clean_parser.set_defaults(func=clean)
 args = argparse.parse_args()
 #argcomplete.autocomplete(argparse)
 
