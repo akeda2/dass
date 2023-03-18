@@ -107,6 +107,7 @@ def compile(args):
             print("Settings file to load: " + args.load)
             settingsfile = args.load
         else:
+            settingsfile = None
             print("File not found: " + args.load)
             exit()
         if os.path.isfile(settingsfile):    
