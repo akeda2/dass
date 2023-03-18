@@ -122,8 +122,13 @@ def compile(args):
             "title": args.title if args.title else input("Title: "),
         }
         new_settings = settings['output_name'] + '.yaml'
-        with open(new_settings, 'w') as file:
-            documents = yaml.dump(settings, file)
+        try:
+            with open(new_settings, 'w') as file:
+                documents = yaml.dump(settings, file)
+                print("Saved configuration to file: " + new_settings)
+        except yaml.YAMLError as exc:
+            print(exc)
+            exit()
     # Compile the document:
     if args.html:
         args.markdown = True
