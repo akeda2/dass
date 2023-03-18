@@ -129,6 +129,16 @@ def compile(args):
         except yaml.YAMLError as exc:
             print(exc)
             exit()
+    # Load the settings from the yaml file if the load argument is given:
+    # If command line arguments are given, they override the settings from the yaml file.
+    if args.load:
+        #print(args)
+        #print(config)
+        args.html = config['html'] if not args.html else args.html
+        args.markdown = config['markdown'] if not args.markdown else args.markdown
+        args.directory = config['directory'] if not args.directory else args.directory
+        args.output_name = config['output_name'] if not args.output_name else args.output_name
+        args.title = config['title'] if not args.title else args.title
     # Compile the document:
     if args.html:
         args.markdown = True
