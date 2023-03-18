@@ -94,6 +94,7 @@ def rename(args):
     
 def compile(args):
     # Load config from yaml file if given, otherwise load the first yaml file found in the current directory.
+    settingsfile = None
     if args.load:
         # Check if args.load is the default value or if a file was given.
         if args.load == 'def':
