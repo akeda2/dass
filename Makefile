@@ -23,4 +23,4 @@ BINDIR ?= $(PREFIX)/bin
 
 install:
 	mkdir -p $(DESTDIR)$(BINDIR)
-	install -m755 eb $(DESTDIR)$(BINDIR)/eb
+	install -m755 dass $(DESTDIR)$(BINDIR)/eb
