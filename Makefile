@@ -1,4 +1,4 @@
-# eb.py Makefile
+# dass.py Makefile
 # 
 
 all: dass del
@@ -23,4 +23,4 @@ BINDIR ?= $(PREFIX)/bin
 
 install:
 	mkdir -p $(DESTDIR)$(BINDIR)
-	install -m755 dass $(DESTDIR)$(BINDIR)/eb
+install -m755 dass $(DESTDIR)$(BINDIR)/dass
