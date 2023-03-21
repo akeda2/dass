@@ -4,6 +4,7 @@ Assembles a file/directory structure into one output file.
 ```
 To build with pyinstaller:
 make
+make install
 To just install in /usr/local/bin/dass:
 ./setup.sh
 ```
