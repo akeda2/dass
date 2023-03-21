@@ -1,5 +1,12 @@
 # dass - Document assembler
 Assembles a file/directory structure into one output file.
+### Installation:
+```
+To build with pyinstaller:
+make
+To just install in /usr/local/bin/dass:
+./setup.sh
+```
 ### Usage:
 ```
 dass [input directory] [output file]
