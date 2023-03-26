@@ -15,8 +15,8 @@ del:
 
 # Clear pyinstall cache and delete file
 clean:
-	pyinstaller --clean dass.py
-	rm -rf ./dist/ ./build/ ./*.spec ./*.pyc ./*.log dass.spec dist/
+	#pyinstaller --clean dass.py
+	rm -rf ./dist/ ./build/ ./*.spec ./*.pyc ./*.log dass.spec dist/ dass
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
