@@ -12,6 +12,7 @@ import argparse
 import markdown
 import yaml
 #import argcomplete
+import sys
 
 def clean(args):
     # Non recursively clean the current directory of all .html, .text and .md files, except for the README.md file:
@@ -28,8 +29,8 @@ def create(args):
             os.mkdir(new_dir)
         else:
             print("Directory already exists.")
-            exit(1)
-        exit()
+            sys.exit(1)
+        sys.exit()
     else:
         print("Adding new document with number " + str(f"{args.number:03d} and title {args.title}"))
         if not os.path.exists(os.path.join(str(f"{args.number:03d}{args.title}.txt"))):
@@ -37,7 +38,7 @@ def create(args):
             new_file = open(os.path.join(str(f"{args.number:03d}{args.title}.txt")), 'w')
         else:
             print("File already exists!")
-            exit(1)
+            sys.exit(1)
         print(new_file)
         """ if not os.path.exists(os.path.normpath(new_file.name)):
             new_file.write('')
@@ -45,7 +46,7 @@ def create(args):
             print("File already exists. 2")
             exit(1) """
         new_file.close()
-        exit()
+        sys.exit()
 
 def rename(args):
     # Look for document or directory beginning with number:
@@ -60,7 +61,7 @@ def rename(args):
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{args.title}.txt"))
                     else:
                         print("File already exists.")
-                        exit(1)
+                        sys.exit(1)
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', file).group(2)
@@ -69,8 +70,8 @@ def rename(args):
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{title}"))
                     else:
                         print("File already exists.")
-                        exit(1)
-                exit()
+                        sys.exit(1)
+                sys.exit()
         for dir in dirnames:
             if dir.startswith(str(f"{args.in_number:03d}")):
                 print("Found directory " + dir)
@@ -80,7 +81,7 @@ def rename(args):
                         print("Renamed directory " + dir + " to " + str(f"{args.out_number:03d}{args.title}"))
                     else:
                         print("Directory already exists.")
-                        exit(1)
+                        sys.exit(1)
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', dir).group(2)
@@ -89,8 +90,8 @@ def rename(args):
                         print("Renamed directory " + dir + " to " + str(f"{args.out_number:03d}{title}"))
                     else:
                         print("Directory already exists.")
-                        exit(1)
-                exit()
+                        sys.exit(1)
+                sys.exit()
     
 def compile(args):
     # Load config from yaml file if given, otherwise load the first yaml file found in the current directory.
@@ -110,7 +111,7 @@ def compile(args):
         else:
             settingsfile = None
             print("File not found: " + args.load)
-            exit()
+            sys.exit()
         if settingsfile and os.path.isfile(settingsfile):    
             with open(settingsfile, 'r') as stream:
                 try:
@@ -119,11 +120,11 @@ def compile(args):
                     print("Loaded configuration from file: " + settingsfile)
                 except yaml.YAMLError as exc:
                     print(exc)
-                    exit()
+                    sys.exit()
                     #break
         else:
             print("No settings file found.")
-            exit()
+            sys.exit()
     if args.save:
         # Save the given settings to a file:
         settings = {
@@ -140,7 +141,7 @@ def compile(args):
                 print("Saved configuration to file: " + new_settings)
         except yaml.YAMLError as exc:
             print(exc)
-            exit()
+            sys.exit()
     # Load the settings from the yaml file if the load argument is given:
     # If command line arguments are given, they override the settings from the yaml file.
     if args.load:
@@ -164,7 +165,7 @@ def compile(args):
     if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
         if args.no_overwrite:
             print("File exists! --no_overwrite is set. Exiting.")
-            exit()
+            sys.exit()
         else:
             print("At least one file exists. It will be overwritten.")
     out_text = open(output_text, 'w', encoding='utf-8-sig')
