@@ -157,7 +157,7 @@ def compile(args):
         args.markdown = True
     directory = os.path.normpath(args.directory)
     print(directory)
-    outname = os.path.normpath(args.output_name) if args.output_name else config['output_name'] or os.path.normpath(input("Output name: "))
+    outname = os.path.normpath(args.output_name) if args.output_name else config['output_name'] if config else os.path.normpath(input("Output name: ")) #c
     output_text = os.path.normpath(outname + ".text") if args.output_name else os.path.normpath(config['output_name'] + ".text") or os.path.normpath(input("Output name: ") + ".text")
     output_markdown = os.path.normpath(outname + ".md") if args.output_name else os.path.normpath(config['output_name'] + ".md") or os.path.normpath(input("Output name: ") + ".md")
     output_html = os.path.normpath(outname + ".html") if args.output_name else os.path.normpath(config['output_name'] + ".html") or os.path.normpath(input("Output name: ") + ".html")
