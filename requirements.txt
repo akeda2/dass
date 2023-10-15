@@ -1,0 +1,6 @@
+altgraph
+Markdown
+packaging
+pyinstaller
+pyinstaller-hooks-contrib
+PyYAML
