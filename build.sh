@@ -22,8 +22,6 @@ fi
 # Activate the virtual environment
 source venv/bin/activate
 
-# Uninstall the previous version of the executable
-pip3 uninstall boinc-client -y
 # Install the dependencies
 pip3 install -r requirements.txt
 
@@ -32,8 +30,8 @@ pyinstaller --onefile "$APPNAME".py --clean -F --noupx
 
 # Move the executable to /usr/local/bin
 # You might need to run this script as root to have permission for this operation
-echo "Moving the executable to /usr/local/bin"
-sudo mv -v dist/"$APPNAME" /usr/local/bin/"$APPNAME"
+echo "Installing to /usr/local/bin"
+sudo install -v -m 755 dist/"$APPNAME" /usr/local/bin/"$APPNAME"
 
 # Deactivate the virtual environment
 deactivate
