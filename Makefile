@@ -1,5 +1,5 @@
 # dass.py Makefile
-# 
+# This is deprecated. Use build.sh instead (uses venv)
 
 all: dass del
 # readme
