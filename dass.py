@@ -2,12 +2,12 @@
 # Short program that concatenates text files in directories and subdirectories into one file.
 # Usage: python3 dass.py [command] [options] [output]
 # Try python3 dass.py --help for more information.
-# ./inst.sh will install the program to /usr/local/bin/dass
+# ./build.sh will install the program to /usr/local/bin/dass
 # The output file will be created if it does not exist. If it does exist, it will be overwritten.
 
 import os
 import re
-import shlex
+#import shlex
 import argparse
 import markdown
 import yaml
@@ -96,6 +96,7 @@ def rename(args):
 def compile(args):
     # Load config from yaml file if given, otherwise load the first yaml file found in the current directory.
     settingsfile = None
+    config = {}
     if args.load:
         # Check if args.load is the default value or if a file was given.
         if args.load == 'def':
@@ -157,10 +158,21 @@ def compile(args):
         args.markdown = True
     directory = os.path.normpath(args.directory)
     print(directory)
-    outname = os.path.normpath(args.output_name) if args.output_name else config['output_name'] if config else os.path.normpath(input("Output name: ")) #c
-    output_text = os.path.normpath(outname + ".text") if args.output_name else os.path.normpath(config['output_name'] + ".text") or os.path.normpath(input("Output name: ") + ".text")
-    output_markdown = os.path.normpath(outname + ".md") if args.output_name else os.path.normpath(config['output_name'] + ".md") or os.path.normpath(input("Output name: ") + ".md")
-    output_html = os.path.normpath(outname + ".html") if args.output_name else os.path.normpath(config['output_name'] + ".html") or os.path.normpath(input("Output name: ") + ".html")
+    """ #outname = os.path.normpath(args.output_name) if args.output_name else config['output_name'] if config else os.path.normpath(input("Output name: ")) #c
+    outname = os.path.normpath(args.output_name) if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ")))
+    #output_text = os.path.normpath(outname + ".text") if args.output_name else os.path.normpath(config['output_name'] + ".text") or os.path.normpath(input("Output name: ") + ".text")
+    output_text = os.path.normpath(outname + ".text") if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ") + ".text"))
+    #output_markdown = os.path.normpath(outname + ".md") if args.output_name else os.path.normpath(config['output_name'] + ".md") or os.path.normpath(input("Output name: ") + ".md")
+    output_markdown = os.path.normpath(outname + ".md") if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ") + ".md"))
+    #output_html = os.path.normpath(outname + ".html") if args.output_name else os.path.normpath(config['output_name'] + ".html") or os.path.normpath(input("Output name: ") + ".html")
+    output_html = os.path.normpath(outname + ".html") if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ") + ".html"))
+ """
+    outname = os.path.normpath(args.output_name) if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: "))
+    output_text = os.path.normpath(outname + ".text") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".text")
+    output_markdown = os.path.normpath(outname + ".md") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".md")
+    output_html = os.path.normpath(outname + ".html") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".html")
+
+
     print(outname)
     if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
         if args.no_overwrite:
@@ -218,7 +230,7 @@ def compile(args):
 
         #if file.endswith(".txt"):
             input_file = open(os.path.join(file), 'r')
-            print("Input file for rubrik: " + input_file.name)
+            print("Input file for header: " + input_file.name)
             # Write the name of the file without extension to the output file.
             if args.markdown:
                 out_buf_md += "\n\n" + "### " + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
