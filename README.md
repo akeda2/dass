@@ -5,6 +5,25 @@ Assembles a file/directory structure into one output file.
 To build with venv and pyinstaller:
 ./build.sh
 ```
+
+### Makefile compatibility:
+The Makefile is deprecated, but still supported as a wrapper around build.sh.
+
+```
+make              # equivalent to: SKIP_INSTALL=1 ./build.sh
+make build        # same as above
+make install      # equivalent to: SKIP_INSTALL=0 ./build.sh
+make clean        # remove build artifacts
+make distclean    # clean + remove venv
+```
+
+You can pass optional variables:
+
+```
+make install INSTALL_DIR=/tmp/dass-bin
+make build DEBUG=1
+```
+
 ### Usage:
 ```
 options:

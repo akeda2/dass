@@ -1,5 +1,15 @@
-#!/bin/bash
-# This is deprecated. Use build.sh instead.
-[[ -x ./build.sh ]] && ./build.sh
-#[ -f dass.py ] && sudo cp --remove-destination dass.py /usr/local/bin/dass
-#[ ! -e ~/boinc-hosts.json ] && ln -s $(realpath boinc-hosts.json) ~/
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+BUILD_SCRIPT="${SCRIPT_DIR}/build.sh"
+
+echo "inst.sh is deprecated. Running build.sh instead."
+
+if [[ ! -f "$BUILD_SCRIPT" ]]; then
+	echo "build.sh not found at ${BUILD_SCRIPT}"
+	exit 1
+fi
+
+exec bash "$BUILD_SCRIPT" "$@"

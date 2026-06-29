@@ -1,34 +1,27 @@
 # dass.py Makefile
-# This is deprecated. Use build.sh instead (uses venv)
+# This is deprecated. Use build.sh directly when possible.
 
-all: dass del
-# readme
+SHELL := /usr/bin/env bash
+.DEFAULT_GOAL := all
 
-# Create dass executable
-dass:
-	# Check for python3-venv:
-	dpkg -l | grep -q python3-venv || echo "python3-venv package not installed'"
-	python3 -m venv --help &> /dev/null || { echo "Python venv is not installed!'"; exit 1; }
-	# Create venv if not exists
-	[[ ! -d venv ]] && { python3 -m venv venv || { echo "venv creation failed" ; exit 1; } ; }
-	source venv/bin/activate || { echo "venv activation failed" ; exit 1; }
-	echo "Installing dependenies"
-	pip install -r requirements.txt || { echo "pip install failed" ; exit 1; }
+APPNAME := dass
+INSTALL_DIR ?= /usr/local/bin
+DEBUG ?= 0
 
-	pyinstaller --onefile "dass".py --clean -F --noupx && mv dist/dass . || { echo "pyinstaller failed" ; exit 1; }
-	deactivate || { echo "venv deactivation failed" ; exit 1; }
-# Remove files created by pyinstaller
-del:
-	rm -rf ./dist/ ./build/ ./*.spec ./*.pyc ./*.log dass.spec dist/
+.PHONY: all build dass install clean distclean
 
-# Clear pyinstall cache and delete file
-clean:
-	#pyinstaller --clean dass.py
-	rm -rf ./dist/ ./build/ ./*.spec ./*.pyc ./*.log dass.spec dist/ dass
+all: build
 
-PREFIX ?= /usr/local
-BINDIR ?= $(PREFIX)/bin
+build dass:
+	@echo "Makefile is deprecated. Delegating to ./build.sh"
+	@DEBUG=$(DEBUG) SKIP_INSTALL=1 ./build.sh
 
 install:
-	mkdir -p $(DESTDIR)$(BINDIR)
-	install -m755 dass $(DESTDIR)$(BINDIR)/dass
+	@echo "Makefile is deprecated. Delegating to ./build.sh"
+	@DEBUG=$(DEBUG) SKIP_INSTALL=0 INSTALL_DIR="$(INSTALL_DIR)" ./build.sh
+
+clean:
+	rm -rf ./dist ./build ./*.spec ./*.pyc ./*.log
+
+distclean: clean
+	rm -rf ./venv
