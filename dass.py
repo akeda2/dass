@@ -55,9 +55,11 @@ def rename(args):
         for file in filenames:
             if file.startswith(str(f"{args.in_number:03d}")):
                 print("Found file " + file)
+                source_path = os.path.join(dirpath, file)
                 if args.title:
-                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}.txt")))):
-                        os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}.txt")))
+                    target_path = os.path.join(dirpath, str(f"{args.out_number:03d}{args.title}.txt"))
+                    if not os.path.exists(os.path.normpath(target_path)):
+                        os.rename(source_path, target_path)
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{args.title}.txt"))
                     else:
                         print("File already exists.")
@@ -65,8 +67,9 @@ def rename(args):
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', file).group(2)
-                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))):
-                        os.rename(os.path.join(args.directory, file), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
+                    target_path = os.path.join(dirpath, str(f"{args.out_number:03d}{title}"))
+                    if not os.path.exists(os.path.normpath(target_path)):
+                        os.rename(source_path, target_path)
                         print("Renamed file " + file + " to " + str(f"{args.out_number:03d}{title}"))
                     else:
                         print("File already exists.")
@@ -117,7 +120,6 @@ def compile(args):
             with open(settingsfile, 'r') as stream:
                 try:
                     config = yaml.safe_load(stream)
-                    compile_parser.set_defaults(**config)
                     print("Loaded configuration from file: " + settingsfile)
                 except yaml.YAMLError as exc:
                     print(exc)
@@ -148,11 +150,16 @@ def compile(args):
     if args.load:
         #print(args)
         #print(config)
-        args.html = config['html'] if not args.html else args.html
-        args.markdown = config['markdown'] if not args.markdown else args.markdown
-        args.directory = config['directory'] if not args.directory else args.directory
-        args.output_name = config['output_name'] if not args.output_name else args.output_name
-        args.title = config['title'] if not args.title else args.title
+        if not args.html:
+            args.html = config.get('html', args.html)
+        if not args.markdown:
+            args.markdown = config.get('markdown', args.markdown)
+        if args.directory in (None, '.', ''):
+            args.directory = config.get('directory', args.directory)
+        if args.output_name is None:
+            args.output_name = config.get('output_name', args.output_name)
+        if args.title is None:
+            args.title = config.get('title', args.title)
     # Compile the document:
     if args.html:
         args.markdown = True
@@ -189,9 +196,20 @@ def compile(args):
 
     directories = []
     files = []
+    ignored_dirs = {'.git', 'venv', '.venv', '__pycache__', 'build', 'dist'}
+    excluded_outputs = {
+        os.path.abspath(output_text),
+        os.path.abspath(output_markdown),
+        os.path.abspath(output_html),
+    }
     for dirpath, dirnames, filenames in os.walk(directory, topdown=True):
+        dirnames[:] = [d for d in dirnames if d not in ignored_dirs]
         directories.append(dirpath)
-        files.extend(os.path.join(dirpath, f) for f in filenames)
+        files.extend(
+            os.path.join(dirpath, f)
+            for f in filenames
+            if os.path.abspath(os.path.join(dirpath, f)) not in excluded_outputs
+        )
 
     directories = sorted(directories)
     files = sorted(files)
@@ -218,7 +236,7 @@ def compile(args):
                     continue """
                 temp_buf += line
 
-            chapter = re.sub("^\d+", "", os.path.dirname(os.path.normpath(input_file.name)))
+            chapter = re.sub(r"^\d+", "", os.path.dirname(os.path.normpath(input_file.name)))
             print("Current filename: " + input_file.name)
             print("Chapter: " + chapter + " Last chapter: " + last_chapter)
             if chapter != last_chapter:
@@ -233,9 +251,9 @@ def compile(args):
             print("Input file for header: " + input_file.name)
             # Write the name of the file without extension to the output file.
             if args.markdown:
-                out_buf_md += "\n\n" + "### " + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
+                out_buf_md += "\n\n" + "### " + re.sub(r"^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
                 out_buf_md += temp_buf
-            out_buf_text += "\n\n" + re.sub("^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
+            out_buf_text += "\n\n" + re.sub(r"^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
             out_buf_text += temp_buf
             # print the filename of the file that is being concatenated to the output file.
             input_file.close()
@@ -285,6 +303,10 @@ ren_parser.set_defaults(func=rename)
 clean_parser.set_defaults(func=clean)
 args = argparse.parse_args()
 #argcomplete.autocomplete(argparse)
+
+if not hasattr(args, 'func'):
+    argparse.print_help()
+    sys.exit(2)
 
 
 
