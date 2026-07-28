@@ -3,5 +3,5 @@
   path: ~/dev/dass
   test: which pytest && pytest -q --tb=short
   build: which pipx && pipx install . --force
-  post-build: gb -I dass.yaml -a
+  post-build: gb -I dass.yaml -a -w
   interval: 3600
