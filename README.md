@@ -73,7 +73,7 @@ dass add 020 "Second subsection"
 
 Compile into text/markdown/html and save settings for next build:
 cd mybook
-dass compile -smw -t "Title of project" .
+dass compile -smw -t "Title of project" book
 ```
 Subdirectories will be chapter-markers. All leading digits will be stripped.
 Using a 3-digit numbering pattern to sort textblocks:

@@ -128,4 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 test*/
+!tests/
+!tests/*.py
 dass

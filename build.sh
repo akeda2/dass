@@ -78,10 +78,11 @@ fi
 deactivate
 
 echo "Cleaning build artifacts"
-rm -rf ./dist ./build ./*.spec ./*.pyc ./*.log
+rm -rf ./build ./*.spec ./*.pyc ./*.log
 
 if [[ "$SKIP_INSTALL" == "1" ]]; then
-	echo "Build complete."
+	echo "Build complete. Binary preserved at dist/${APPNAME}"
 else
+	rm -rf ./dist
 	echo "Build complete. Installed to ${INSTALL_DIR}/${APPNAME}"
 fi

@@ -74,8 +74,8 @@ def rename(args):
             if dirname.startswith(str(f"{args.in_number:03d}")):
                 print("Found directory " + dirname)
                 if args.title:
-                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))):
-                        os.rename(os.path.join(args.directory, dirname), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))
+                    if not os.path.exists(os.path.normpath(os.path.join(dirpath, str(f"{args.out_number:03d}{args.title}")))):
+                        os.rename(os.path.join(dirpath, dirname), os.path.join(dirpath, str(f"{args.out_number:03d}{args.title}")))
                         print("Renamed directory " + dirname + " to " + str(f"{args.out_number:03d}{args.title}"))
                     else:
                         print("Directory already exists.")
@@ -83,13 +83,15 @@ def rename(args):
                 else:
                     # If no title is given, use the old title:
                     title = re.search(r'(\d+)(.*)', dirname).group(2)
-                    if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))):
-                        os.rename(os.path.join(args.directory, dirname), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
+                    if not os.path.exists(os.path.normpath(os.path.join(dirpath, str(f"{args.out_number:03d}{title}")))):
+                        os.rename(os.path.join(dirpath, dirname), os.path.join(dirpath, str(f"{args.out_number:03d}{title}")))
                         print("Renamed directory " + dirname + " to " + str(f"{args.out_number:03d}{title}"))
                     else:
                         print("Directory already exists.")
                         sys.exit(1)
                 sys.exit()
+    print("No document or directory found with number " + str(f"{args.in_number:03d}"))
+    sys.exit(1)
     
 def compile_docs(args):
     # Load config from yaml file if given, otherwise load the first yaml file found in the current directory.
@@ -115,6 +117,9 @@ def compile_docs(args):
             with open(settingsfile, 'r', encoding='utf-8') as stream:
                 try:
                     config = yaml.safe_load(stream)
+                    if not isinstance(config, dict):
+                        print("No settings found in file: " + settingsfile)
+                        sys.exit(1)
                     print("Loaded configuration from file: " + settingsfile)
                 except yaml.YAMLError as exc:
                     print(exc)
@@ -125,12 +130,16 @@ def compile_docs(args):
             sys.exit(1)
     if args.save:
         # Save the given settings to a file:
+        if args.output_name is None:
+            args.output_name = input("Output name: ")
+        if args.title is None:
+            args.title = input("Title: ")
         settings = {
             "directory": args.directory if args.directory else os.getcwd(),
-            "output_name": args.output_name if args.output_name else input("Output name: "),
+            "output_name": args.output_name,
             "markdown": args.markdown if args.markdown else False,
             "html": args.html if args.html else False,
-            "title": args.title if args.title else input("Title: "),
+            "title": args.title,
         }
         new_settings = settings['output_name'] + '.yaml'
         try:
@@ -160,24 +169,33 @@ def compile_docs(args):
         args.markdown = True
     directory = os.path.normpath(args.directory)
     print(directory)
+    if not os.path.isdir(directory):
+        print("Directory not found: " + args.directory)
+        sys.exit(1)
     outname = os.path.normpath(args.output_name) if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: "))
-    output_text = os.path.normpath(outname + ".text") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".text")
-    output_markdown = os.path.normpath(outname + ".md") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".md")
-    output_html = os.path.normpath(outname + ".html") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".html")
+    output_text = os.path.normpath(outname + ".text")
+    output_markdown = os.path.normpath(outname + ".md")
+    output_html = os.path.normpath(outname + ".html")
 
 
     print(outname)
-    if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
+    requested_outputs = [output_text]
+    if args.markdown:
+        requested_outputs.append(output_markdown)
+    if args.html:
+        requested_outputs.append(output_html)
+    if any(os.path.exists(output) for output in requested_outputs):
         if args.no_overwrite:
             print("File exists! --no_overwrite is set. Exiting.")
             sys.exit(1)
         else:
             print("At least one file exists. It will be overwritten.")
-    out_text = open(output_text, 'w', encoding='utf-8-sig')
+    output_encoding = 'utf-8' if args.disable_bom else 'utf-8-sig'
+    out_text = open(output_text, 'w', encoding=output_encoding)
     if args.markdown:
-        out_md = open(output_markdown, 'w', encoding='utf-8-sig')
+        out_md = open(output_markdown, 'w', encoding=output_encoding)
     if args.html:
-        out_html = open(output_html, 'w', encoding='utf-8-sig')
+        out_html = open(output_html, 'w', encoding=output_encoding)
 
 
     directories = []
@@ -215,7 +233,7 @@ def compile_docs(args):
                 print(input_file.name)
                 temp_buf = ''.join(input_file.readlines())
 
-            chapter = re.sub(r"^\d+", "", os.path.dirname(os.path.normpath(file_path)))
+            chapter = re.sub(r"^\d+", "", os.path.basename(os.path.dirname(os.path.normpath(file_path))))
             print("Current filename: " + file_path)
             print("Chapter: " + chapter + " Last chapter: " + last_chapter)
             if chapter != last_chapter:
