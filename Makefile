@@ -8,7 +8,7 @@ APPNAME := dass
 INSTALL_DIR ?= $(HOME)/.local/bin
 DEBUG ?= 0
 
-.PHONY: all build dass install clean distclean
+.PHONY: all build dass install test clean distclean
 
 all: install
 
@@ -19,6 +19,9 @@ build dass:
 install:
 	@echo "Makefile is deprecated. Delegating to ./build.sh"
 	@DEBUG=$(DEBUG) SKIP_INSTALL=0 INSTALL_DIR="$(INSTALL_DIR)" ./build.sh
+
+test:
+	python3 -m pytest -q
 
 clean:
 	rm -rf ./dist ./build ./*.spec ./*.pyc ./*.log

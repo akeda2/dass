@@ -2,7 +2,7 @@
 # Short program that concatenates text files in directories and subdirectories into one file.
 # Usage: python3 dass.py [command] [options] [output]
 # Try python3 dass.py --help for more information.
-# ./build.sh will install the program to /usr/local/bin/dass
+# ./build.sh will install the program to ~/.local/bin/dass by default.
 # The output file will be created if it does not exist. If it does exist, it will be overwritten.
 
 import os
@@ -14,7 +14,7 @@ import yaml
 #import argcomplete
 import sys
 
-def clean(args):
+def clean(_args):
     # Non recursively clean the current directory of all .html, .text and .md files, except for the README.md file:
     for file in os.listdir(os.getcwd()):
         if file.endswith(".html") or file.endswith(".text") or file.endswith(".md") and file != "README.md":
@@ -34,18 +34,13 @@ def create(args):
     else:
         print("Adding new document with number " + str(f"{args.number:03d} and title {args.title}"))
         if not os.path.exists(os.path.join(str(f"{args.number:03d}{args.title}.txt"))):
-            # Create new file:
-            new_file = open(os.path.join(str(f"{args.number:03d}{args.title}.txt")), 'w')
+            # Create a new empty document file.
+            new_file_path = os.path.join(str(f"{args.number:03d}{args.title}.txt"))
+            with open(new_file_path, 'w', encoding='utf-8'):
+                pass
         else:
             print("File already exists!")
             sys.exit(1)
-        print(new_file)
-        """ if not os.path.exists(os.path.normpath(new_file.name)):
-            new_file.write('')
-        else:
-            print("File already exists. 2")
-            exit(1) """
-        new_file.close()
         sys.exit()
 
 def rename(args):
@@ -75,28 +70,28 @@ def rename(args):
                         print("File already exists.")
                         sys.exit(1)
                 sys.exit()
-        for dir in dirnames:
-            if dir.startswith(str(f"{args.in_number:03d}")):
-                print("Found directory " + dir)
+        for dirname in dirnames:
+            if dirname.startswith(str(f"{args.in_number:03d}")):
+                print("Found directory " + dirname)
                 if args.title:
                     if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))):
-                        os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))
-                        print("Renamed directory " + dir + " to " + str(f"{args.out_number:03d}{args.title}"))
+                        os.rename(os.path.join(args.directory, dirname), os.path.join(args.directory, str(f"{args.out_number:03d}{args.title}")))
+                        print("Renamed directory " + dirname + " to " + str(f"{args.out_number:03d}{args.title}"))
                     else:
                         print("Directory already exists.")
                         sys.exit(1)
                 else:
                     # If no title is given, use the old title:
-                    title = re.search(r'(\d+)(.*)', dir).group(2)
+                    title = re.search(r'(\d+)(.*)', dirname).group(2)
                     if not os.path.exists(os.path.normpath(os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))):
-                        os.rename(os.path.join(args.directory, dir), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
-                        print("Renamed directory " + dir + " to " + str(f"{args.out_number:03d}{title}"))
+                        os.rename(os.path.join(args.directory, dirname), os.path.join(args.directory, str(f"{args.out_number:03d}{title}")))
+                        print("Renamed directory " + dirname + " to " + str(f"{args.out_number:03d}{title}"))
                     else:
                         print("Directory already exists.")
                         sys.exit(1)
                 sys.exit()
     
-def compile(args):
+def compile_docs(args):
     # Load config from yaml file if given, otherwise load the first yaml file found in the current directory.
     settingsfile = None
     config = {}
@@ -115,19 +110,19 @@ def compile(args):
         else:
             settingsfile = None
             print("File not found: " + args.load)
-            sys.exit()
+            sys.exit(1)
         if settingsfile and os.path.isfile(settingsfile):    
-            with open(settingsfile, 'r') as stream:
+            with open(settingsfile, 'r', encoding='utf-8') as stream:
                 try:
                     config = yaml.safe_load(stream)
                     print("Loaded configuration from file: " + settingsfile)
                 except yaml.YAMLError as exc:
                     print(exc)
-                    sys.exit()
+                    sys.exit(1)
                     #break
         else:
             print("No settings file found.")
-            sys.exit()
+            sys.exit(1)
     if args.save:
         # Save the given settings to a file:
         settings = {
@@ -139,12 +134,12 @@ def compile(args):
         }
         new_settings = settings['output_name'] + '.yaml'
         try:
-            with open(new_settings, 'w') as file:
-                documents = yaml.dump(settings, file)
+            with open(new_settings, 'w', encoding='utf-8') as file:
+                yaml.dump(settings, file)
                 print("Saved configuration to file: " + new_settings)
         except yaml.YAMLError as exc:
             print(exc)
-            sys.exit()
+            sys.exit(1)
     # Load the settings from the yaml file if the load argument is given:
     # If command line arguments are given, they override the settings from the yaml file.
     if args.load:
@@ -165,15 +160,6 @@ def compile(args):
         args.markdown = True
     directory = os.path.normpath(args.directory)
     print(directory)
-    """ #outname = os.path.normpath(args.output_name) if args.output_name else config['output_name'] if config else os.path.normpath(input("Output name: ")) #c
-    outname = os.path.normpath(args.output_name) if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ")))
-    #output_text = os.path.normpath(outname + ".text") if args.output_name else os.path.normpath(config['output_name'] + ".text") or os.path.normpath(input("Output name: ") + ".text")
-    output_text = os.path.normpath(outname + ".text") if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ") + ".text"))
-    #output_markdown = os.path.normpath(outname + ".md") if args.output_name else os.path.normpath(config['output_name'] + ".md") or os.path.normpath(input("Output name: ") + ".md")
-    output_markdown = os.path.normpath(outname + ".md") if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ") + ".md"))
-    #output_html = os.path.normpath(outname + ".html") if args.output_name else os.path.normpath(config['output_name'] + ".html") or os.path.normpath(input("Output name: ") + ".html")
-    output_html = os.path.normpath(outname + ".html") if args.output_name else config.get('output_name', os.path.normpath(input("Output name: ") + ".html"))
- """
     outname = os.path.normpath(args.output_name) if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: "))
     output_text = os.path.normpath(outname + ".text") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".text")
     output_markdown = os.path.normpath(outname + ".md") if args.output_name else config.get('output_name') or os.path.normpath(input("Output name: ") + ".md")
@@ -184,7 +170,7 @@ def compile(args):
     if os.path.exists(output_text) or os.path.exists(output_markdown) or os.path.exists(output_html):
         if args.no_overwrite:
             print("File exists! --no_overwrite is set. Exiting.")
-            sys.exit()
+            sys.exit(1)
         else:
             print("At least one file exists. It will be overwritten.")
     out_text = open(output_text, 'w', encoding='utf-8-sig')
@@ -224,20 +210,13 @@ def compile(args):
     last_chapter = ''
     for file in files:
         if file.endswith(".txt"):
-            input_file = open(os.path.join(file), 'r')
-            print(input_file.name)
-            temp_buf = ''
-            for line in input_file.readlines():
-                """ lex = shlex.shlex(line)
-                lex.whitespace = ''
-                line = ''.join(list(lex))
-                if not line:
-                    print("Found comment line: " + line + " Skipping.")
-                    continue """
-                temp_buf += line
+            file_path = os.path.join(file)
+            with open(file_path, 'r', encoding='utf-8') as input_file:
+                print(input_file.name)
+                temp_buf = ''.join(input_file.readlines())
 
-            chapter = re.sub(r"^\d+", "", os.path.dirname(os.path.normpath(input_file.name)))
-            print("Current filename: " + input_file.name)
+            chapter = re.sub(r"^\d+", "", os.path.dirname(os.path.normpath(file_path)))
+            print("Current filename: " + file_path)
             print("Chapter: " + chapter + " Last chapter: " + last_chapter)
             if chapter != last_chapter:
                 print("+Chapter: " + chapter)
@@ -246,17 +225,13 @@ def compile(args):
                 out_buf_text += "\n\n" + chapter + "\n\n"
                 last_chapter = chapter
 
-        #if file.endswith(".txt"):
-            input_file = open(os.path.join(file), 'r')
-            print("Input file for header: " + input_file.name)
+            print("Input file for header: " + file_path)
             # Write the name of the file without extension to the output file.
             if args.markdown:
-                out_buf_md += "\n\n" + "### " + re.sub(r"^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
+                out_buf_md += "\n\n" + "### " + re.sub(r"^\d+", "", os.path.splitext(os.path.basename(file_path))[0]) + "\n\n"
                 out_buf_md += temp_buf
-            out_buf_text += "\n\n" + re.sub(r"^\d+", "", os.path.splitext(os.path.basename(input_file.name))[0]) + "\n\n"
+            out_buf_text += "\n\n" + re.sub(r"^\d+", "", os.path.splitext(os.path.basename(file_path))[0]) + "\n\n"
             out_buf_text += temp_buf
-            # print the filename of the file that is being concatenated to the output file.
-            input_file.close()
     out_text.write(out_buf_text)
     out_text.close()
     if args.markdown:
@@ -282,7 +257,7 @@ def build_parser():
     compile_parser.add_argument('-s', '--save', action='store_true', help='Save the given configuration to a file.')
     # Load configuration from the first yaml file found in the current directory. Just load any existing yaml file:
     compile_parser.add_argument('-l', '--load', const='def', nargs='?', help='Load a configuration from a file.')
-    compile_parser.set_defaults(func=compile)
+    compile_parser.set_defaults(func=compile_docs)
 
     # A parser for the "add" command
     add_parser = subparsers.add_parser('add', aliases=['a','ad'], help='Add a new document')
