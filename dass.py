@@ -266,52 +266,54 @@ def compile(args):
         out_html.write(markdown.markdown(out_buf_md, extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite']))
         out_html.close()
 
-argparse = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.', allow_abbrev=True)
-subparsers = argparse.add_subparsers(title='subcommands',help='sub-command help', dest='subcommand')
+def build_parser():
+    parser = argparse.ArgumentParser(description='Concatenate text files in directories and subdirectories into one file.', allow_abbrev=True)
+    subparsers = parser.add_subparsers(title='subcommands',help='sub-command help', dest='subcommand')
 
-# A parser for the "compile" command
-compile_parser = subparsers.add_parser('compile', aliases=['c','co','com','comp'], help='Sort and Compile a directory of numbered text files into output file.')
-compile_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory to concatenate.')
-compile_parser.add_argument('output_name', nargs='?', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
-compile_parser.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
-compile_parser.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
-compile_parser.add_argument('-b', '--disable_bom', action='store_true', help='Disable the Byte Order Mark (BOM) in the output file(s).')
-compile_parser.add_argument('-n', '--no_overwrite', action='store_true', help='Do not overwrite existing files.')
-compile_parser.add_argument('-t', '--title', help='Custom title for the output file.')
-compile_parser.add_argument('-s', '--save', action='store_true', help='Save the given configuration to a file.')
-# Load configuration from the first yaml file found in the current directory. Just load any existing yaml file:
-compile_parser.add_argument('-l', '--load', const='def', nargs='?', help='Load a configuration from a file.')
-compile_parser.set_defaults(func=compile)
+    # A parser for the "compile" command
+    compile_parser = subparsers.add_parser('compile', aliases=['c','co','com','comp'], help='Sort and Compile a directory of numbered text files into output file.')
+    compile_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory to concatenate.')
+    compile_parser.add_argument('output_name', nargs='?', help='Filename without extension use for output files. If any file exists, it will be overwritten.')
+    compile_parser.add_argument('-m', '--markdown', action='store_true', help='Use Markdown syntax for headers. Outputs a .md file.')
+    compile_parser.add_argument('-w', '--html', action='store_true', help='Convert output into HTML. Outputs a .html file.')
+    compile_parser.add_argument('-b', '--disable_bom', action='store_true', help='Disable the Byte Order Mark (BOM) in the output file(s).')
+    compile_parser.add_argument('-n', '--no_overwrite', action='store_true', help='Do not overwrite existing files.')
+    compile_parser.add_argument('-t', '--title', help='Custom title for the output file.')
+    compile_parser.add_argument('-s', '--save', action='store_true', help='Save the given configuration to a file.')
+    # Load configuration from the first yaml file found in the current directory. Just load any existing yaml file:
+    compile_parser.add_argument('-l', '--load', const='def', nargs='?', help='Load a configuration from a file.')
+    compile_parser.set_defaults(func=compile)
 
-# A parser for the "add" command
-add_parser = subparsers.add_parser('add', aliases=['a','ad'], help='Add a new document')
-add_parser.add_argument('number', type=int, help='The sorting number of the new document.')
-add_parser.add_argument('title', help='The title of the new document.')
-add_parser.add_argument('-c', '--chapter', action="store_true", help='Add new chapter/directory iso document.')
+    # A parser for the "add" command
+    add_parser = subparsers.add_parser('add', aliases=['a','ad'], help='Add a new document')
+    add_parser.add_argument('number', type=int, help='The sorting number of the new document.')
+    add_parser.add_argument('title', help='The title of the new document.')
+    add_parser.add_argument('-c', '--chapter', action="store_true", help='Add new chapter/directory iso document.')
 
-# Rename command
-ren_parser = subparsers.add_parser('rename', aliases=['r','re','ren'], help='Rename a document')
-ren_parser.add_argument('in_number', type=int, help='The current sorting number of document to rename.')
-ren_parser.add_argument('out_number', type=int, help='The new sorting number of the document to rename.')
-ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
-ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
+    # Rename command
+    ren_parser = subparsers.add_parser('rename', aliases=['r','re','ren'], help='Rename a document')
+    ren_parser.add_argument('in_number', type=int, help='The current sorting number of document to rename.')
+    ren_parser.add_argument('out_number', type=int, help='The new sorting number of the document to rename.')
+    ren_parser.add_argument('title', nargs='?', help='The new title of the document. If left empty, the old title will be used.')
+    ren_parser.add_argument('-d', '--directory', nargs='?', default=".", help='The base directory.')
 
-clean_parser = subparsers.add_parser('clean', aliases=['cl','cle'], help='Clean up the directory structure.')
+    clean_parser = subparsers.add_parser('clean', aliases=['cl','cle'], help='Clean up the directory structure.')
 
-add_parser.set_defaults(func=create)
-ren_parser.set_defaults(func=rename)
-clean_parser.set_defaults(func=clean)
-args = argparse.parse_args()
-#argcomplete.autocomplete(argparse)
-
-if not hasattr(args, 'func'):
-    argparse.print_help()
-    sys.exit(2)
+    add_parser.set_defaults(func=create)
+    ren_parser.set_defaults(func=rename)
+    clean_parser.set_defaults(func=clean)
+    return parser
 
 
-
-
-def main(args):
+def main(argv=None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if not hasattr(args, 'func'):
+        parser.print_help()
+        return 2
     args.func(args)
+    return 0
+
+
 if __name__ == "__main__":
-    main(args) 
+    raise SystemExit(main())

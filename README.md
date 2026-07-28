@@ -1,8 +1,28 @@
 # dass - Document assembler
 Assembles a file/directory structure into one output file.
 ### Installation:
+Install in user mode with pipx:
 ```
-To build with venv and pyinstaller:
+pipx install dass
+```
+
+Install directly from this repository:
+```
+pipx install "git+https://github.com/akeda2/dass.git"
+```
+
+For local development from this checkout:
+```
+pipx install .
+```
+
+Upgrade later with:
+```
+pipx upgrade dass
+```
+
+Legacy binary build with venv + pyinstaller is still available:
+```
 ./build.sh
 ```
 
