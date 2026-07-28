@@ -57,3 +57,10 @@ def test_installers_install_completion_file() -> None:
         assert "COMPLETION_DIR" in script
         assert "COMPLETION_SOURCE" in script
         assert "install_completion" in script
+
+
+def test_python_package_installs_completion_file() -> None:
+    pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert '[tool.setuptools.data-files]' in pyproject
+    assert '"share/bash-completion/completions" = ["completions/dass"]' in pyproject
