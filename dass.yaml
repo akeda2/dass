@@ -1,0 +1,7 @@
+- name: dass
+  active: true
+  path: ~/dev/dass
+  test: which pytest && pytest -q --tb=short
+  build: which pipx && pipx install . --force
+  post-build: gb -I dass.yaml -a
+  interval: 3600
