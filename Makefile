@@ -5,12 +5,12 @@ SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := all
 
 APPNAME := dass
-INSTALL_DIR ?= /usr/local/bin
+INSTALL_DIR ?= $(HOME)/.local/bin
 DEBUG ?= 0
 
 .PHONY: all build dass install clean distclean
 
-all: build
+all: install
 
 build dass:
 	@echo "Makefile is deprecated. Delegating to ./build.sh"

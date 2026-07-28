@@ -30,9 +30,9 @@ Legacy binary build with venv + pyinstaller is still available:
 The Makefile is deprecated, but still supported as a wrapper around build.sh.
 
 ```
-make              # equivalent to: SKIP_INSTALL=1 ./build.sh
-make build        # same as above
-make install      # equivalent to: SKIP_INSTALL=0 ./build.sh
+make              # equivalent to: SKIP_INSTALL=0 INSTALL_DIR=$HOME/.local/bin ./build.sh
+make build        # equivalent to: SKIP_INSTALL=1 ./build.sh
+make install      # equivalent to: SKIP_INSTALL=0 INSTALL_DIR=$HOME/.local/bin ./build.sh
 make clean        # remove build artifacts
 make distclean    # clean + remove venv
 ```

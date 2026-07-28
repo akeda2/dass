@@ -6,7 +6,7 @@ set -euo pipefail
 [[ "${DEBUG:-0}" == "1" ]] && set -x
 
 APPNAME="dass"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 SKIP_INSTALL="${SKIP_INSTALL:-0}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -64,6 +64,7 @@ if [[ "$SKIP_INSTALL" == "1" ]]; then
 	echo "SKIP_INSTALL=1 set, skipping install step. Built binary at dist/${APPNAME}"
 else
 	echo "Installing to ${INSTALL_DIR}"
+	mkdir -p "${INSTALL_DIR}"
 	if [[ -w "$INSTALL_DIR" ]]; then
 		install -v -m 755 "dist/${APPNAME}" "${INSTALL_DIR}/${APPNAME}"
 	elif command -v sudo >/dev/null 2>&1; then
