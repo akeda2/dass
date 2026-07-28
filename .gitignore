@@ -131,3 +131,5 @@ test*/
 !tests/
 !tests/*.py
 dass
+!completions/
+!completions/dass

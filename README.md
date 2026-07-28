@@ -16,6 +16,13 @@ For local development from this checkout:
 pipx install .
 ```
 
+To install from this checkout with Bash completion:
+```
+./inst.sh
+```
+
+Completion is installed to `${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion/completions` by default. Set `COMPLETION_DIR` to override it.
+
 Upgrade later with:
 ```
 pipx upgrade dass

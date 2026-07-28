@@ -7,8 +7,10 @@ set -euo pipefail
 
 APPNAME="dass"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
+COMPLETION_DIR="${COMPLETION_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion/completions}"
 SKIP_INSTALL="${SKIP_INSTALL:-0}"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+COMPLETION_SOURCE="${SCRIPT_DIR}/completions/${APPNAME}"
 
 cd "$SCRIPT_DIR"
 
@@ -26,6 +28,24 @@ if [[ ! -f "${APPNAME}.py" ]]; then
 	echo "${APPNAME}.py not found in $SCRIPT_DIR"
 	exit 1
 fi
+
+if [[ ! -f "$COMPLETION_SOURCE" ]]; then
+	echo "Bash completion not found at $COMPLETION_SOURCE"
+	exit 1
+fi
+
+install_completion() {
+	echo "Installing Bash completion to ${COMPLETION_DIR}"
+	if mkdir -p "$COMPLETION_DIR" 2>/dev/null && [[ -w "$COMPLETION_DIR" ]]; then
+		install -v -m 644 "$COMPLETION_SOURCE" "${COMPLETION_DIR}/${APPNAME}"
+	elif command -v sudo >/dev/null 2>&1; then
+		sudo mkdir -p "$COMPLETION_DIR"
+		sudo install -v -m 644 "$COMPLETION_SOURCE" "${COMPLETION_DIR}/${APPNAME}"
+	else
+		echo "No write access to ${COMPLETION_DIR} and sudo is not available."
+		exit 1
+	fi
+}
 
 if command -v dpkg >/dev/null 2>&1; then
 	echo "Checking for python3-venv package"
@@ -73,6 +93,7 @@ else
 		echo "No write access to ${INSTALL_DIR} and sudo is not available."
 		exit 1
 	fi
+	install_completion
 fi
 
 deactivate

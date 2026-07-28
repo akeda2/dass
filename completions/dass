@@ -1,0 +1,57 @@
+_dass() {
+	local command=""
+	local current="${COMP_WORDS[COMP_CWORD]}"
+	local previous=""
+	local word
+	local index
+
+	if (( COMP_CWORD > 0 )); then
+		previous="${COMP_WORDS[COMP_CWORD - 1]}"
+	fi
+
+	case "$previous" in
+		-d|--directory)
+			mapfile -t COMPREPLY < <(compgen -d -- "$current")
+			return
+			;;
+		-l|--load)
+			COMPREPLY=()
+			while IFS= read -r word; do
+				case "$word" in
+					*.yaml|*.yml) COMPREPLY+=("$word") ;;
+				esac
+			done < <(compgen -f -- "$current")
+			return
+			;;
+	esac
+
+	for (( index = 1; index < COMP_CWORD; index++ )); do
+		word="${COMP_WORDS[index]}"
+		case "$word" in
+			compile|c|co|com|comp) command="compile"; break ;;
+			add|a|ad) command="add"; break ;;
+			rename|r|re|ren) command="rename"; break ;;
+			clean|cl|cle) command="clean"; break ;;
+		esac
+	done
+
+	case "$command" in
+		compile)
+			mapfile -t COMPREPLY < <(compgen -W '-h --help -d --directory -m --markdown -w --html -b --disable_bom -n --no_overwrite -t --title -s --save -l --load' -- "$current")
+			;;
+		add)
+			mapfile -t COMPREPLY < <(compgen -W '-h --help -c --chapter' -- "$current")
+			;;
+		rename)
+			mapfile -t COMPREPLY < <(compgen -W '-h --help -d --directory' -- "$current")
+			;;
+		clean)
+			mapfile -t COMPREPLY < <(compgen -W '-h --help' -- "$current")
+			;;
+		*)
+			mapfile -t COMPREPLY < <(compgen -W 'compile add rename clean' -- "$current")
+			;;
+	esac
+}
+
+complete -F _dass dass
