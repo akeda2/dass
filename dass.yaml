@@ -1,7 +1,7 @@
 - name: dass
   active: true
   path: ~/dev/dass
-  test: which pytest && pytest -q --tb=short
+  test: if command -v pytest >/dev/null 2>&1; then pytest -q --tb=short; else python3 -m pytest -q --tb=short; fi
   build: which pipx && pipx install . --force
   post-build: gb -I dass.yaml -a -w
   interval: 3600
